@@ -4,7 +4,7 @@ from nltk import edit_distance
 import csv
 from sklearn.model_selection import train_test_split
 
-from ml.ris.gastro.risnlp.dataset import process
+from text import process
 
 IMPRESSION_ID = 'impression_id'
 IMPRESSION = 'impression'
@@ -235,7 +235,7 @@ def train_validate_split_df(
 def reports_to_train_test(reports_dir, persist_path=None):
     # This does not make sense, because there are no targets given,
     # but is a good example of the whole process.
-    from ml.ris.gastro.risnlp.dataset import process
+    from ml.ris.gastro.risnlp.textproc import process
 
     df_impressions = extract_impressions_from_files(reports_dir, persist_path)
 

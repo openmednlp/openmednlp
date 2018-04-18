@@ -10,9 +10,9 @@ from sklearn.svm import LinearSVC
 
 import pickle
 
-from ml.ris.gastro.risnlp import dataset
-from ml.ris.gastro.risnlp.dataset import viz
-from ml.ris.gastro.risnlp.dataset import common
+import text
+
+from text import viz, common
 
 
 def find_best_model(X_train, X_test, y_train, y_test):
@@ -32,7 +32,7 @@ def find_best_model(X_train, X_test, y_train, y_test):
 
 
 def run_all(show_happy_faces=False):
-    X_train, X_test, y_train, y_test, tfidf_vectorizer = dataset.get_prepared_gata()
+    X_train, X_test, y_train, y_test, tfidf_vectorizer = text.get_prepared_gata()
 
     clfs = {
         'MultinomialNB': MultinomialNB(),

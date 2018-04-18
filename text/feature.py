@@ -1,8 +1,8 @@
 import pickle
 from sklearn.feature_extraction.text import TfidfVectorizer
 from gensim.models import Phrases, Word2Vec
-from ml.ris.gastro.risnlp.dataset import common
-
+from text import common
+from sklearn.feature_extraction.text import CountVectorizer
 
 def train_tfidf_vectorizer(X, persist_path=None):
     tfidf_vectorizer = TfidfVectorizer()
@@ -12,6 +12,23 @@ def train_tfidf_vectorizer(X, persist_path=None):
 
     return tfidf_vectorizer
 
+
+def train_count_vectorizer(tokenized_sentences):
+    cv = CountVectorizer()
+    cv.fit(tokenized_sentences)
+
+    global _count_vectorizer
+    _count_vectorizer = cv
+
+    return cv
+
+
+def count_vectorizer_transform(sentence):
+    return _count_vectorizer.transform(sentence).indices
+
+
+def get_sentence_count_vector(sentence):
+    return _count_vectorizer.transform(sentence).indices
 
 def train_word2vec_vectorizer(tokenized_sentences,
                               group_by_phrases=False,

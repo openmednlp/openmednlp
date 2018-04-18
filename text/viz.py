@@ -6,6 +6,7 @@ from sklearn.metrics import confusion_matrix, precision_recall_fscore_support
 from wordcloud import WordCloud
 from PIL import Image
 from os import path
+from text import process
 
 
 def plot_confusion_matrix(cm, classes,
@@ -106,32 +107,58 @@ def show_stats(y, y_hat):
     print('Done')
 
 
-def word_cloud(df):
+def word_cloud(text, show_plot=True, mask_path=None, save_path=None):
     # TODO: not tested as function
-    mask = np.array(
-        Image.open(path.join('/home/giga/Downloads', "circle_mask.jpg"))
-    )
-
-    df_positive = df[df.binary_class]
-    stemmed_beurteilungs = df_positive.processed_concat
-    positive_words = ' '.join(stemmed_beurteilungs)
+    mask = None
+    if mask_path:
+        mask = np.array(
+            Image.open(mask_path)
+        )
 
     wc = WordCloud(width=512, height=512, background_color="white", max_words=100, mask=mask)
-    wc.generate(positive_words)
-    wc.to_file('/home/giga/Downloads/positive.png')
+    wc.generate(text)
 
-    plt.figure()
-    plt.imshow(wc)
+    if save_path:
+        wc.to_file(save_path)
 
-    mask = np.array(Image.open(path.join('/home/giga/Downloads', "circle_mask.jpg")))
+    if show_plot:
+        plt.figure()
+        plt.imshow(wc)
+        plt.show()
 
-    df_negative = df[~df.binary_class]
-    stemmed_beurteilungs = df_negative.processed_concat
-    negative_words = ' '.join(stemmed_beurteilungs)
 
-    wc = WordCloud(width=512, height=512, background_color="white", max_words=100, mask=mask)
-    wc.generate(negative_words)
-    wc.to_file('/home/giga/Downloads/negative.png')
+def _df_to_text(
+        df, show_column,
+        filter_column,
+        condition_list,
+        min_word_len):
 
-    plt.figure()
-    plt.imshow(wc)
+    df_filtered = df[
+        df[filter_column].isin(condition_list)
+    ]
+
+    text = ' '.join(df_filtered[show_column])
+    text = process.remove_short([text], min_word_len)
+    text = process.stem(text)
+
+    return text[0]
+
+
+def word_clouds(df, save_dir=None):
+    filters = [
+        [4, 5],
+        [1, 2],
+        [0, 3]]
+
+    for filter_values in filters:
+        text = _df_to_text(
+            df, 'sentence', 'ground_truth', filter_values, 5
+        )
+        name_part = '_'.join([str(v) for v in filter_values])
+        save_path = save_dir
+        if save_dir:
+            save_path = path.join(
+                save_dir,
+                name_part + '_filtered.png'
+            )
+        word_cloud(text, save_path=save_path)

@@ -10,7 +10,7 @@ from keras.datasets import imdb
 import tensorflow as tf
 import keras
 import numpy as np
-from ml.ris.gastro.risnlp import dataset
+import text
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -33,10 +33,10 @@ def get_sentence_count_vector(sentence):
 
 
 def get_indexed_data(df):
-    X, word_dict = dataset.index_tokenized_sentences(
-        df[dataset.PROCESSED_TOKENS]
+    X, word_dict = text.index_tokenized_sentences(
+        df[text.PROCESSED_TOKENS]
     )
-    y = df[dataset.BINARY_CLASS]
+    y = df[text.BINARY_CLASS]
 
     return X, y, word_dict
 
@@ -44,7 +44,7 @@ def get_indexed_data(df):
 def get_indexed_and_padded_data():
     np.random.seed(42)
 
-    df_processed = dataset.process_df(
+    df_processed = text.process_df(
         df,
         X_column_name='sentence',
         y_column_name='sentence_sentiment',
@@ -60,7 +60,7 @@ def get_indexed_and_padded_data():
         y,
         test_size=0.3,
         random_state=42,
-        stratify=df_processed[dataset.BINARY_CLASS]
+        stratify=df_processed[text.BINARY_CLASS]
     )
 
     X_train = sequence.pad_sequences(X_train, maxlen=max_sentence_length)

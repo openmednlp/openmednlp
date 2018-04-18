@@ -1,5 +1,4 @@
-from ml.ris.gastro.risnlp.dataset import collection, process, feature
-from ml.ris.gastro.risnlp.dataset import viz, common
+from text import collection, viz, common, process, feature
 from ml.ris.gastro.risnlp.models.standard import bnb
 
 
@@ -10,10 +9,12 @@ import numpy as np
 config = common.config_to_namedtuple()
 
 
-def get_tfidf_data(pickle_dir, limit=None):
-    vectorizer_path = None
-    if pickle_dir is not None:
-        vectorizer_path = common.create_pickle_path(pickle_dir, 'tfidf_vectorizer')
+def get_tfidf_data(pickle_path, limit=None):
+    vectorizer_pickle_path = None
+    if pickle_path:
+        vectorizer_pickle_path = common.create_pickle_path(
+            pickle_path, 'tfidf_vectorizer'
+        )
 
     # Load data
     sentence_granularity = config.GRANULARITY.sentences
@@ -30,7 +31,7 @@ def get_tfidf_data(pickle_dir, limit=None):
 
     vectorizer = feature.train_tfidf_vectorizer(
         X,
-        persist_path=vectorizer_path
+        persist_path=vectorizer_pickle_path
     )
     X_vec = vectorizer.transform(X)
     X_validate_vec = vectorizer.transform(X_validate)
@@ -122,9 +123,57 @@ def create_model():
     viz.show_stats(y_test, y_hat)
     viz.plot_confusion_reports(y_test, y_hat)
 
+    csv_path = getattr(config.INPUT, config.GRANULARITY.sentences)
+    df = collection.file_to_df(csv_path)
+    viz.word_clouds(df, 'misc')
 
-def load_model():
-    pass
+
+import spacy
+import string
+from spacy.lang.de.stop_words import STOP_WORDS
+import time
+nlp = spacy.load('de')
+
+
+# Clean text before feeding it to spaCy
+punctuations = string.punctuation
+
+
+# Define function to cleanup text by removing personal pronouns, stopwords, and puncuation
+#TODO: add to risnlp
+def cleanup_text(docs, logging=False):
+    texts = []
+    counter = 1
+    for doc in docs:
+        if counter % 1000 == 0 and logging:
+            print("Processed %d out of %d documents." % (counter, len(docs)))
+        counter += 1
+        doc = nlp(doc, disable=['parser', 'ner'])
+        tokens = [tok.lemma_.lower().strip() for tok in doc if tok.lemma_ != '-PRON-']
+        tokens = [tok for tok in tokens if tok not in STOP_WORDS and tok not in punctuations]
+        tokens = ' '.join(tokens)
+        texts.append(tokens)
+    return pd.Series(texts)
+
+
+def nn_experiment(x,x_val, y, y_val):
+    # Parse documents and print some info
+
+    x_clean = cleanup_text(x)
+
+    print('Parsing documents...')
+    start = time()
+    train_vec = []
+    for doc in nlp.pipe(x, batch_size=500):
+        if doc.has_vector:
+            train_vec.append(doc.vector)
+        # If doc doesn't have a vector, then fill it with zeros.
+        else:
+            train_vec.append(np.zeros((128,), dtype="float32"))
+
+    # train_vec = [doc.vector for doc in nlp.pipe(train_cleaned, batch_size=500)]
+    train_vec = np.array(train_vec)
+
 
 
 if __name__ == '__main__':
