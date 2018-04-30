@@ -22,3 +22,9 @@ assets.register('js_all', js)
 @app.route('/')
 def main():
     return render_template('index.html', version=app.config['VERSION'])
+
+@app.route('/process', methods=['POST'])
+def process():
+    input_text = request.form['input_text']
+    logging.debug(input_text)
+    return jsonify({'input': input_text, 'status': 'ok'})
