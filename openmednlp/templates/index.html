@@ -8,5 +8,10 @@
 
 <body class="w-100 sans-serif">
    {% include 'partials/header.html' %}
+   {% include 'input.html' %}
+
+   {% assets "js_all" %}
+   <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+   {% endassets %}
 </body>
 </html>

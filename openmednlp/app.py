@@ -12,6 +12,12 @@ app.config.from_object('openmednlp.default_config')
 app.config.from_pyfile('config.cfg')
 version = app.config['VERSION'] = '0.0.1'
 
+assets = Environment(app)
+js = Bundle("js/jquery-3.3.1.min.js",
+            "js/script.js",
+            filters='jsmin', output='gen/packed.js')
+assets.register('js_all', js)
+
 
 @app.route('/')
 def main():

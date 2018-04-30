@@ -1,2 +1,2 @@
 #!/bin/sh
-nodemon --ignore logs --exec "python" runserver.py
+nodemon --ignore logs --exec python runserver.py
