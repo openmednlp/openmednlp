@@ -1,2 +1,2 @@
 # openmednlp
-Main project
+Main project, contains WebApp
