@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 
 import pandas as pd
+import requests
 import schedule
 from flask import Flask, g, jsonify, make_response, render_template, request
 from flask_assets import Bundle, Environment
@@ -27,4 +28,6 @@ def main():
 def process():
     input_text = request.form['input_text']
     logging.debug(input_text)
+    response = requests.post(app.config['HARBOR_URL'] + '/predict', data={'input_text': input_text})
+    logging.debug(response)
     return jsonify({'input': input_text, 'status': 'ok'})
