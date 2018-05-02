@@ -14,9 +14,11 @@ app.config.from_pyfile('config.cfg')
 version = app.config['VERSION'] = '0.0.1'
 
 assets = Environment(app)
-js = Bundle("js/jquery-3.3.1.min.js",
-            "js/script.js",
-            filters='jsmin', output='gen/packed.js')
+js = Bundle(
+    "js/jquery-3.3.1.min.js",
+    "js/script.js",
+    filters='jsmin',
+    output='gen/packed.js')
 assets.register('js_all', js)
 
 
@@ -24,10 +26,16 @@ assets.register('js_all', js)
 def main():
     return render_template('index.html', version=app.config['VERSION'])
 
+
 @app.route('/process', methods=['POST'])
 def process():
     input_text = request.form['input_text']
     logging.debug(input_text)
-    response = requests.post(app.config['HARBOR_URL'] + '/predict', data={'input_text': input_text})
-    logging.debug(response)
-    return jsonify({'input': input_text, 'status': 'ok'})
+    response = requests.post(
+        app.config['HARBOR_URL'] + '/predict', data={'input_text': input_text})
+    result = response.json()
+    return render_template(
+        'index.html',
+        version=app.config['VERSION'],
+        input_text=input_text,
+        result=result)

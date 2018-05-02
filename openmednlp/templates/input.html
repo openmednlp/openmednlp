@@ -1,18 +1,38 @@
 <div class="w-100 center mw8 pt2">
-    <div class="fl w-50 ">
-        <h1 class="f6 fl">Raw input</h1>
-        <a class="fr f6 link dim br3 ph2 pv1 mb1 mr4 dib white bg-dark-green" href="#process" id="process">Process</a>
-        <div class="db">
-            <textarea rows="30" id="input_text" name="input_text" class="db border-box hover-black w-100 measure ba b--black-20 pa2 br2 mb2"></textarea>
+    <form action="/process" method="POST">
+        <div class="fl w-50 ">
+            <h1 class="f6 fl">Raw input</h1>
+            <button class="fr f6 link dim br3 ph2 pv1 mb1 mr4 dib white bg-dark-green" type="submit">Process</button>
+            <div class="db">
+
+                <textarea rows="30" id="input_text" name="input_text" class="db border-box hover-black w-100 measure ba b--black-20 pa2 br2 mb2"
+                    style="white-space:pre-line">
+                {{input_text}}
+            </textarea>
+            </div>
         </div>
-    </div>
+    </form>
     <div class="fl w-50">
         <h1 class="f6">NLP Output</h1>
-        <div >
-            Processing status: <span id="result_status"></span>
+        <div>
+            Overall status:
+            <span id="overall_status">{{ result.result['overall_label'] }}</span>
+            <br> Overall label:
+            <span id="overall_status_label">{{ result.result['overall_label_text'] }}</span>
         </div>
         <p>Output</p>
-        <div style="white-space: pre;background-color: #FFFF00;" id="result" name="input_text" class="db w-100 measure b--black-20 br2 mb2 pa2"></div>
+        <div id="result" name="input_text" class="db w-100 measure b--black-20">
+            {% for s in result.result.segments %}
+            <article class="center br2 hidden ba b--black-10 mv1">
+                <h1 class="f6 bg-near-white br2 br--top black-60 mv0 pv2 ph3">Result: {{s.label_text}}, {{s.label}}</h1>
+                <div class="ph3 bt b--black-10">
+                    <p class="f6 f5-ns lh-copy measure">
+                        {{s.segment}}
+                    </p>
+                </div>
+            </article>
+            {% endfor %}
         </div>
     </div>
+</div>
 </div>
